@@ -1,2 +1,5 @@
 langchain-openai
 python-dotenv
+langchain-community
+pypdf
+langchain-core
