@@ -7,6 +7,7 @@ from langchain_community.document_loaders import PyPDFLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_openai import OpenAIEmbeddings
 from langchain_core.vectorstores import InMemoryVectorStore
+from langchain_core.runnables import RunnablePassthrough
 
 load_dotenv(find_dotenv(),override=True)
 
@@ -32,4 +33,27 @@ if __name__ == "__main__":
 
     # Perform Similarity search
     results= vector_store.similarity_search(query= "Who published the nigerian banking law reports?")
-    print(results)
+    print(results[0].page_content)
+
+    # Retriever
+    retriever= vector_store.as_retriever(search_type='similarity',search_kwargs={"k":1})
+
+    llm=ChatOpenAI(model="gpt-4o-mini")
+
+    message="""
+                Answer the following questions using context only.If you do not know the answer say you do not 
+                know, do not make anything up:
+
+                {question}
+
+                Context:
+                {context}
+    
+                """
+    
+    prompt= ChatPromptTemplate.from_messages([("humam",message)])
+    rag_chain = {"context":retriever, "question":RunnablePassthrough} | prompt | llm
+
+    response= rag_chain.invoke("Who published the nigerian banking law reports?")
+
+    print(f"this is from the llm \n{response.content}")

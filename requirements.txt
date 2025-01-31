@@ -3,3 +3,4 @@ python-dotenv
 langchain-community
 pypdf
 langchain-core
+streamlit
